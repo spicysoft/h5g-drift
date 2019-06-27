@@ -1,9 +1,9 @@
 // Liberapp 2019 - Tahiti Katagai
 // ゲームシーン
 
-const PLAYER_WIDTH_PER_H = 1/32;
-const PLAYER_HEIGHT_PER_H = 1/24;
-const PLAYER_SPEED_PER_H = 1/120;
+const PLAYER_WIDTH_PER_H = 1/16;
+const PLAYER_HEIGHT_PER_H = 1/12;
+const PLAYER_SPEED_PER_H = 1/90;
 
 const ROAD_WIDTH_PER_H = 1/3;
 

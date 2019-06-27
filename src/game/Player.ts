@@ -16,7 +16,10 @@ class Player extends GameObject{
     color:number;
     vx:number;
     vy:number;
-    big:number;
+    turnLeft:boolean = false;
+    rotationDelta:number = 0;
+
+    magnet:number;
 
     button:Button;
     state:()=>void = this.stateNone;
@@ -30,7 +33,7 @@ class Player extends GameObject{
         this.radius = this.sizeW/2;
         this.color = PLAYER_COLOR;
         this.vx = 0;
-        this.vy = 0;
+        this.vy = -Util.h(PLAYER_SPEED_PER_H);
         this.setDisplay( x, y );
 
         Camera2D.x = 0;
@@ -48,7 +51,7 @@ class Player extends GameObject{
         let shape:egret.Shape = this.display as egret.Shape;
         if( this.display == null ){
             this.display = shape = new egret.Shape();
-            GameObject.gameDisplay.addChild(this.display);
+            GameObject.gameDisplay.addChildAt(this.display, 1);
         }else
             shape.graphics.clear();
 
@@ -64,9 +67,11 @@ class Player extends GameObject{
     }
 
     scrollCamera( lerp:number = 1/8 ){
-        Camera2D.x = this.x - Util.w(0.5);
-        Camera2D.x = this.y - Util.h(0.5);
-        Camera2D.rotation = this.display.rotation;
+        Camera2D.x = this.x;// - Util.w(0.5);
+        Camera2D.y = this.y;// - Util.h(0.75);
+        Camera2D.localX = Util.w(0.5);
+        Camera2D.localY = Util.h(0.75);
+        Camera2D.rotation += (-this.display.rotation - Camera2D.rotation) * lerp;
     }
 
     setStateNone(){
@@ -79,7 +84,25 @@ class Player extends GameObject{
         this.state = this.stateRun;
     }
     stateRun() {
+        if( this.button.touch ){
+            if( this.button.press ) this.turnLeft = !this.turnLeft;
 
+            this.rotationDelta *= 0.5;
+            this.rotationDelta += this.turnLeft ? +1 : -1;
+            this.display.rotation += this.rotationDelta;
+
+            let vx =  Math.sin( this.display.rotation * (Math.PI/180) );
+            let vy = -Math.cos( this.display.rotation * (Math.PI/180) );
+            this.vx *= 0.9;
+            this.vy *= 0.9;
+            this.vx += (vx * Util.h(PLAYER_SPEED_PER_H) - this.vx) * 0.25;
+            this.vy += (vy * Util.h(PLAYER_SPEED_PER_H) - this.vy) * 0.25;
+        }
+
+
+        this.x += this.vx;
+        this.y += this.vy;
+        this.scrollCamera();
     }
 
     setStateMiss(){
