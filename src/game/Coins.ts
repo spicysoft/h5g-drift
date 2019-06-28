@@ -58,7 +58,7 @@ class Coin extends GameObject{
 
     // 画面外で消滅
     isOutOfScreen():boolean{
-        if( this.display.x + this.radius <= Camera2D.x ){
+        if( this.display.y - this.radius > Camera2D.y + Util.h(0.5) ){
             this.destroy();
             return true;
         }

@@ -16,8 +16,8 @@ class Player extends GameObject{
     color:number;
     vx:number;
     vy:number;
-    turnLeft:boolean = false;
-    rotationDelta:number = 0;
+    rd:number = 0;
+    rv:number = 0;
 
     magnet:number;
 
@@ -33,8 +33,9 @@ class Player extends GameObject{
         this.radius = this.sizeW/2;
         this.color = PLAYER_COLOR;
         this.vx = 0;
-        this.vy = -Util.h(PLAYER_SPEED_PER_H);
+        this.vy = 0;//-Util.h(PLAYER_SPEED_PER_H);
         this.setDisplay( x, y );
+        this.display.rotation = -45;
 
         Camera2D.x = 0;
         this.scrollCamera( 1 );
@@ -66,14 +67,6 @@ class Player extends GameObject{
         this.state();
     }
 
-    scrollCamera( lerp:number = 1/8 ){
-        Camera2D.x = this.x;// - Util.w(0.5);
-        Camera2D.y = this.y;// - Util.h(0.75);
-        Camera2D.localX = Util.w(0.5);
-        Camera2D.localY = Util.h(0.75);
-        Camera2D.rotation += (-this.display.rotation - Camera2D.rotation) * lerp;
-    }
-
     setStateNone(){
         this.state = this.stateNone;
     }
@@ -84,26 +77,35 @@ class Player extends GameObject{
         this.state = this.stateRun;
     }
     stateRun() {
-        if( this.button.touch ){
-            if( this.button.press ) this.turnLeft = !this.turnLeft;
+        this.rd = (this.button.touch) ? +45 : -45;
+        this.rv *= 0.5;
+        this.rv += Util.clamp( this.rd - this.display.rotation, -2, +2 );
+        this.display.rotation += this.rv;
 
-            this.rotationDelta *= 0.5;
-            this.rotationDelta += this.turnLeft ? +1 : -1;
-            this.display.rotation += this.rotationDelta;
+        let vx =  Math.sin( this.display.rotation * (Math.PI/180) );
+        let vy = -Math.cos( this.display.rotation * (Math.PI/180) );
 
-            let vx =  Math.sin( this.display.rotation * (Math.PI/180) );
-            let vy = -Math.cos( this.display.rotation * (Math.PI/180) );
-            this.vx *= 0.9;
-            this.vy *= 0.9;
-            this.vx += (vx * Util.h(PLAYER_SPEED_PER_H) - this.vx) * 0.25;
-            this.vy += (vy * Util.h(PLAYER_SPEED_PER_H) - this.vy) * 0.25;
-        }
-
+        const rate = 0.98;
+        this.vx *= rate;
+        this.vy *= rate;
+        this.vx += vx * Util.h(PLAYER_SPEED_PER_H) * (1-rate);
+        this.vy += vy * Util.h(PLAYER_SPEED_PER_H) * (1-rate);
 
         this.x += this.vx;
         this.y += this.vy;
         this.scrollCamera();
+
+        if( !Road.checkOnRoad( this.x, this.y ) ){
+            this.setStateMiss();
+        }
     }
+    scrollCamera( lerp:number = 1/8 ){
+        Camera2D.x = this.x;
+        Camera2D.y = this.y;
+        Camera2D.localX = Util.w(0.5);
+        Camera2D.localY = Util.h(0.75);
+    }
+
 
     setStateMiss(){
         if( this.state == this.stateMiss )
