@@ -14,6 +14,7 @@ class Player extends GameObject{
     sizeH:number;
     radius:number;
     color:number;
+    speed:number;
     vx:number;
     vy:number;
     rd:number = 0;
@@ -32,6 +33,7 @@ class Player extends GameObject{
         this.sizeH = Util.h(PLAYER_HEIGHT_PER_H);
         this.radius = this.sizeW/2;
         this.color = PLAYER_COLOR;
+        this.speed = Util.h( PLAYER_MIN_SPEED_PER_H );
         this.vx = 0;
         this.vy = 0;//-Util.h(PLAYER_SPEED_PER_H);
         this.setDisplay( x, y );
@@ -82,18 +84,22 @@ class Player extends GameObject{
         this.rv += Util.clamp( this.rd - this.display.rotation, -2, +2 );
         this.display.rotation += this.rv;
 
+        this.speed = Util.lerp( Util.h( PLAYER_MIN_SPEED_PER_H ), Util.h( PLAYER_MAX_SPEED_PER_H ), Wave.hardRate );
         let vx =  Math.sin( this.display.rotation * (Math.PI/180) );
         let vy = -Math.cos( this.display.rotation * (Math.PI/180) );
-
         const rate = 0.98;
         this.vx *= rate;
         this.vy *= rate;
-        this.vx += vx * Util.h(PLAYER_SPEED_PER_H) * (1-rate);
-        this.vy += vy * Util.h(PLAYER_SPEED_PER_H) * (1-rate);
+        this.vx += vx * this.speed * (1-rate);
+        this.vy += vy * this.speed * (1-rate);
 
         this.x += this.vx;
         this.y += this.vy;
         this.scrollCamera();
+
+        if( this.rv**2 >= 1**2 && randI(0,3)==0 ){
+            new EffectSmoke( this.x, this.y + randF(0, this.sizeH), randF(vx,-vx*3), randF(vy,-vy*3), this.sizeW * randF(0.4, 0.9) );
+        }
 
         if( !Road.checkOnRoad( this.x, this.y ) ){
             this.setStateMiss();

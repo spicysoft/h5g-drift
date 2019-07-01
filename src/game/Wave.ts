@@ -26,9 +26,9 @@ class Wave extends GameObject{
         while( this.lastPy > Player.I.y - Util.h(1.2) ){
             const range = Util.h( randF(Util.lerp( 1, 0.5, Wave.hardRate), 1.5) );
             const angle = (this.turnLeft ? +40 : -40) * (Math.PI/180);
-            const radius = Util.h(ROAD_RADIUS_PER_H) * randF( Util.lerp( 1, 0.5, Wave.hardRate), 1 );
-
+            const radius = Util.h(ROAD_RADIUS_PER_H) * randF( Util.lerp( 1, 0.7, Wave.hardRate), 1 );
             this.newRoad( range, angle, radius, true );
+
             Wave.hardRate = Util.clamp( -this.lastPy / (Util.height * 20), 0, 1 );
         }
     }
@@ -41,7 +41,20 @@ class Wave extends GameObject{
         new Road( this.lastPx, this.lastPy, x, y, radius );
 
         if( coin ){
-            new Coin( this.lastPx + ux * range /2, this.lastPy + uy * range/2 );
+            const space = Util.h(1/10);
+            const count = Math.floor( range*0.5 / space );
+            let cx = this.lastPx + ux * range * 0.25;
+            let cy = this.lastPy + uy * range * 0.25;
+
+            const offset = radius * randF(-0.8, +0.8) * Wave.hardRate;
+            cx +=  Math.sin( angle + Math.PI/2 ) * offset;
+            cy += -Math.cos( angle + Math.PI/2 ) * offset;
+
+            for( let i=0 ; i<count ; i++ ){
+                new Coin( cx, cy );
+                cx += ux * space;
+                cy += uy * space;
+            }
         }
 
         this.lastPx = x;
