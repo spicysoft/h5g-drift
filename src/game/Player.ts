@@ -97,15 +97,16 @@ class Player extends GameObject{
         this.y += this.vy;
         this.scrollCamera();
 
-        if( this.rv**2 >= 1**2 && randI(0,3)==0 ){
-            new EffectSmoke( this.x, this.y + randF(0, this.sizeH), randF(vx,-vx*3), randF(vy,-vy*3), this.sizeW * randF(0.4, 0.9) );
+        if( this.rv**2 >= 0.1**2 && randI(0,3)==0 ){
+            new EffectSmoke( this.x, this.y+randF(0, this.sizeH), vx*randF(-9,1), vy*randF(-9,1), this.sizeW * randF(0.4, 0.9) );
         }
 
         if( !Road.checkOnRoad( this.x, this.y ) ){
             this.setStateMiss();
         }
     }
-    scrollCamera( lerp:number = 1/8 ){
+
+    scrollCamera( lerp:number = 1/16 ){
         Camera2D.x = this.x;
         Camera2D.y = this.y;
         Camera2D.localX = Util.w(0.5);

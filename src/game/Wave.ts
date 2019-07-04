@@ -13,35 +13,38 @@ class Wave extends GameObject{
         super();
         Wave.hardRate = 0;
 
-        this.lastPx = 0;
-        this.lastPy = 0;
+        this.lastPx = Util.h(START_X_PER_H);
+        this.lastPy = Util.h(START_Y_PER_H);
         
         const range = Util.h(1);
-        const angle = (this.turnLeft ? +45 : -45) * (Math.PI/180);
+        const rotation = (this.turnLeft ? +45 : -45);
         const radius = Util.h(ROAD_RADIUS_PER_H);
-        this.newRoad( range, angle, radius );
+        this.newRoad( range, rotation, radius );
     }
 
     update() {
         while( this.lastPy > Player.I.y - Util.h(1.2) ){
-            const range = Util.h( randF(Util.lerp( 1, 0.5, Wave.hardRate), 1.5) );
-            const angle = (this.turnLeft ? +40 : -40) * (Math.PI/180);
-            const radius = Util.h(ROAD_RADIUS_PER_H) * randF( Util.lerp( 1, 0.7, Wave.hardRate), 1 );
-            this.newRoad( range, angle, radius, true );
+            const range = Util.h( randF(Util.lerp( 0.85, 0.42, Wave.hardRate), 2.0) );  // 2.0まで。長過ぎるとスマホで表示がバグる
+            let rotation = 40;
+            if( Wave.hardRate >= 1 && randI(0,3)==0 ) rotation = 20;
+            rotation = rotation * (this.turnLeft ? +1 : -1);
+            const radius = Util.h(ROAD_RADIUS_PER_H) * randF( Util.lerp( 1, 0.58, Wave.hardRate), 1 );
+            this.newRoad( range, rotation, radius, randBool() );
 
-            Wave.hardRate = Util.clamp( -this.lastPy / (Util.height * 20), 0, 1 );
+            Wave.hardRate = Util.clamp( -(this.lastPy - Util.h(START_Y_PER_H)) / Util.h(40), 0, 1 );
         }
     }
 
-    newRoad( range:number, angle:number, radius:number, coin:boolean=false ){
+    newRoad( range:number, rotation:number, radius:number, coin:boolean=false ){
+        const angle = rotation * (Math.PI/180);
         const ux =  Math.sin( angle );
         const uy = -Math.cos( angle );
         const x = this.lastPx + ux * range;
         const y = this.lastPy + uy * range;
-        new Road( this.lastPx, this.lastPy, x, y, radius );
+        new Road( this.lastPx, this.lastPy, x, y, radius, rotation );
 
         if( coin ){
-            const space = Util.h(1/10);
+            const space = Util.h(1/6);
             const count = Math.floor( range*0.5 / space );
             let cx = this.lastPx + ux * range * 0.25;
             let cy = this.lastPy + uy * range * 0.25;

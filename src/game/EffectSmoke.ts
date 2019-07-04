@@ -33,8 +33,8 @@ class EffectSmoke extends GameObject{
     update() {
         this.display.x += this.vx;
         this.display.y += this.vy;
-        this.vx *= 0.95;
-        this.vy *= 0.95;
+        this.vx *= 0.90;
+        this.vy *= 0.90;
 
         this.display.scaleX -= 1/32;
         this.display.scaleY = this.display.scaleX;
